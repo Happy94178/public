@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 創意作品牆</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* === 變數與基礎設定 === */
+        :root {
+            --paper-bg: #fdfbf7;
+            --ink-color: #2c3e50;
+            --accent-color: #e67e22; /* 溫暖橘 */
+            --highlight-color: #f1c40f;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-radius-hand: 255px 15px 225px 15px / 15px 225px 15px 255px;
+            --border-width: 2px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--paper-bg);
+            /* 紙張紋理效果 */
+            background-image: radial-gradient(#d3d3d3 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--ink-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* === 導覽列與標題 === */
+        header {
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin: 10px 0;
+            display: inline-block;
+            padding: 10px 30px;
+            border: var(--border-width) solid var(--ink-color);
+            border-radius: var(--border-radius-hand);
+            background: white;
+            box-shadow: 4px 4px 0 var(--shadow-color);
+            transform: rotate(-1deg);
+        }
+
+        .header-icons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .icon-btn {
+            background: white;
+            border: 2px solid var(--ink-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 2px 2px 0 var(--shadow-color);
+            transition: transform 0.1s;
+        }
+
+        .icon-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: none;
+        }
+
+        /* === 標籤切換 === */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+
+        .tab-btn {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 1.1rem;
+            padding: 10px 25px;
+            background: white;
+            border: 2px solid var(--ink-color);
+            border-radius: var(--border-radius-hand);
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #7f8c8d;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-color);
+            color: white;
+            transform: rotate(1deg) scale(1.05);
+            box-shadow: 3px 3px 0 var(--shadow-color);
+            border-color: var(--ink-color);
+            font-weight: bold;
+        }
+
+        /* === 內容區域 === */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === 畫廊網格 === */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            border: 2px solid var(--ink-color);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.1);
+        }
+
+        .card-img-container {
+            width: 100%;
+            height: 200px;
+            background-color: #eee;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 2px dashed #ddd;
+            position: relative;
+            cursor: pointer; /* 統一變成手指游標，提示可點擊 */
+        }
+
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .card-img-container:hover .card-img {
+            transform: scale(1.05);
+        }
+
+        /* YouTube 播放按鈕疊加層 */
+        .play-icon-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 30px;
+            pointer-events: none; /* 讓點擊穿透到圖片 */
+            border: 3px solid white;
+            transition: background 0.2s;
+        }
+        
+        .card-img-container:hover .play-icon-overlay {
+            background: rgba(230, 126, 34, 0.9); /* hover 時變橘色 */
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .card-content {
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        .card-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: var(--ink-color);
+        }
+
+        .card-text {
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.5;
+            word-break: break-all;
+        }
+
+        .card-footer {
+            padding: 10px 15px;
+            background: #f9f9f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #eee;
+        }
+
+        .like-btn {
+            background: white;
+            border: 2px solid var(--ink-color);
+            border-radius: 20px;
+            padding: 5px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .like-btn:hover:not(:disabled) {
+            background: #ffecec;
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .like-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .like-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #eee;
+        }
+
+        .like-btn.liked {
+            background: #ff6b6b;
+            color: white;
+            border-color: #ff6b6b;
+        }
+
+        /* === 上傳表單 === */
+        .upload-form {
+            background: white;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px;
+            border: 2px solid var(--ink-color);
+            border-radius: var(--border-radius-hand);
+            box-shadow: 6px 6px 0 var(--shadow-color);
+            position: relative;
+        }
+        
+        .upload-form::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.5);
+            border-left: 1px dashed rgba(0,0,0,0.1);
+            border-right: 1px dashed rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1;
+            background-image: linear-gradient(45deg, rgba(255,255,255,.5) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.5) 50%, rgba(255,255,255,.5) 75%, transparent 75%, transparent);
+            background-size: 20px 20px;
+            opacity: 0.7;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="url"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .upload-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--ink-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: opacity 0.3s;
+        }
+
+        .upload-btn:disabled {
+            opacity: 0.5;
+            cursor: wait;
+        }
+
+        /* === Modal (設定與說明) === */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 15px;
+            border: 3px solid var(--ink-color);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px dashed #eee;
+            padding-bottom: 10px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+            color: #999;
+        }
+
+        .modal-body p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .copy-btn, .clear-btn, .gen-link-btn {
+            padding: 8px 15px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .copy-btn { background: #e0e0e0; color: #333; margin-top: 5px; }
+        .clear-btn { background: #ff7675; color: white; width: 100%; margin-top: 10px;}
+        .gen-link-btn { background: var(--accent-color); color: white; width: 100%; margin-top: 10px;}
+
+        .qr-display {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .qr-display img {
+            max-width: 150px;
+            border: 2px solid #eee;
+            padding: 5px;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        /* === Lightbox (圖片/影片大圖預覽) === */
+        .lightbox-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer; /* 點擊關閉 */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .lightbox-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        /* 圖片容器 */
+        .lightbox-content-img {
+            max-width: 90%;
+            max-height: 90%;
+            border: 4px solid white;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            object-fit: contain;
+            cursor: default;
+        }
+
+        /* 影片容器 */
+        .lightbox-content-video {
+            width: 90%;
+            max-width: 960px;
+            aspect-ratio: 16 / 9;
+            background: black;
+            border: 4px solid white;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            cursor: default;
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            line-height: 1;
+            text-shadow: 0 0 5px black;
+        }
+
+        /* 隱藏元素 */
+        .hidden { display: none; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🎨 創意作品牆</h1>
+        <div class="header-icons">
+            <button class="icon-btn" onclick="openModal('helpModal')" title="使用說明">ℹ️</button>
+            <button class="icon-btn" onclick="openModal('settingsModal')" title="設定">⚙️</button>
+        </div>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('gallery')">👀 觀賞作品 (學生)</button>
+        <button class="tab-btn" onclick="switchTab('upload')">📤 上傳作品 (老師)</button>
+    </div>
+
+    <div class="container">
+        
+        <!-- 畫廊區域 -->
+        <div id="gallery-section" class="view-section active">
+            <div id="loading" class="loading-spinner">
+                ⏳ 正在載入作品集...<br>
+                <small style="font-size: 0.8em; color: #999;">(若很久沒反應，請檢查設定中的網址)</small>
+            </div>
+            <div id="gallery-grid" class="gallery-grid">
+                <!-- JS 動態插入作品 -->
+            </div>
+        </div>
+
+        <!-- 上傳區域 -->
+        <div id="upload-section" class="view-section">
+            <div class="upload-form">
+                <h2 style="text-align: center; margin-bottom: 25px;">✨ 上傳新作品</h2>
+                
+                <div class="form-group">
+                    <label>作品類型</label>
+                    <select id="workType" onchange="toggleInputFields()">
+                        <option value="image">圖片 (自動壓縮)</option>
+                        <option value="text">純文字心得</option>
+                        <option value="url">YouTube 影片</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>標題</label>
+                    <input type="text" id="workTitle" placeholder="請輸入作品標題" maxlength="50">
+                </div>
+
+                <!-- 圖片上傳區 -->
+                <div class="form-group" id="input-image">
+                    <label>選擇圖片 (支援 JPG, PNG)</label>
+                    <input type="file" id="imageFile" accept="image/*">
+                    <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">* 圖片將自動壓縮至 800px 寬度</div>
+                </div>
+
+                <!-- 文字輸入區 -->
+                <div class="form-group hidden" id="input-text">
+                    <label>內容描述</label>
+                    <textarea id="textContent" rows="5" placeholder="請輸入心得或是文字創作..."></textarea>
+                </div>
+
+                <!-- 網址輸入區 -->
+                <div class="form-group hidden" id="input-url">
+                    <label>YouTube 連結</label>
+                    <input type="url" id="urlContent" placeholder="https://www.youtube.com/watch?v=... 或 https://youtube.com/shorts/...">
+                    <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">* 支援一般影片、Shorts、短網址。</div>
+                </div>
+
+                <button class="upload-btn" id="submitBtn" onclick="submitWork()">🚀 發送作品</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 燈箱 Modal (圖片/影片) -->
+    <div id="lightbox" class="lightbox-modal" onclick="closeLightbox(event)">
+        <span class="lightbox-close">&times;</span>
+        <!-- 內容容器，動態切換 -->
+        <div id="lightbox-container" style="display:flex; justify-content:center; width:100%; height:100%; align-items:center;">
+             <!-- JS 將注入 img 或 iframe -->
+        </div>
+    </div>
+
+    <!-- 設定 Modal -->
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">⚙️ 系統設定</h3>
+                <button class="close-btn" onclick="closeModal('settingsModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Google Apps Script URL (API)</label>
+                    <input type="password" id="gasUrlInput" placeholder="https://script.google.com/macros/s/..." onchange="saveSettings()">
+                    <small style="color: #666; display: block; margin-top: 5px;">請輸入部署後的 Web App URL</small>
+                </div>
+                
+                <hr style="border: 0; border-top: 1px dashed #ccc; margin: 20px 0;">
+                
+                <h4>🔗 分享與連結</h4>
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label>本網頁的發布網址 (Web Page URL)</label>
+                    <input type="text" id="appPublicUrl" placeholder="https://yourname.github.io/my-app/">
+                    <small style="color: #e67e22; display: block; margin-top: 5px; font-size: 0.85rem;">
+                        ⚠️ 請務必確認此網址正確，否則 QR Code 將無效。<br>
+                        (若是本地檔案 file:// 或預覽 blob: 請勿分享)
+                    </small>
+                </div>
+
+                <button class="gen-link-btn" onclick="generateShareLink()">產生 QR Code 與分享連結</button>
+                
+                <div id="shareResult" class="hidden" style="margin-top: 15px; background: #f0f0f0; padding: 10px; border-radius: 8px;">
+                    <div class="qr-display">
+                        <img id="qrImage" src="" alt="QR Code">
+                    </div>
+                    <p style="font-size: 0.8rem; word-break: break-all; margin-top: 10px;" id="shortLinkDisplay"></p>
+                    <button class="copy-btn" onclick="copyShareLink()">複製連結</button>
+                </div>
+
+                <hr style="border: 0; border-top: 1px dashed #ccc; margin: 20px 0;">
+                <button class="clear-btn" onclick="clearSettings()">⚠️ 清除所有設定並重置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 說明 Modal -->
+    <div id="helpModal" class="modal-overlay">
+        <div class="modal" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 class="modal-title">ℹ️ 部署教學與程式碼</h3>
+                <button class="close-btn" onclick="closeModal('helpModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>部署步驟：</strong></p>
+                <ol style="padding-left: 20px; margin-bottom: 20px;">
+                    <li>前往 <a href="https://script.google.com/" target="_blank">Google Apps Script</a> 建立新專案。</li>
+                    <li>複製下方程式碼，覆蓋 `Code.gs`。</li>
+                    <li>點擊「部署」>「新增部署作業」>「網頁應用程式」。</li>
+                    <li><strong>執行身分</strong>：設為「我」。</li>
+                    <li><strong>誰可以存取</strong>：設為「任何人」(重要！)。</li>
+                    <li>複製產生的網址，填入本網頁的設定 (⚙️) 中。</li>
+                </ol>
+                
+                <p><strong>GAS 後端程式碼：</strong></p>
+                <div class="code-block">
+                    <pre id="gasCodeDisplay">// 請複製完整的 Code.gs 內容...</pre>
+                </div>
+                <button class="copy-btn" onclick="copyGasCode()">📋 一鍵複製程式碼</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自訂 Alert Modal -->
+    <div id="alertModal" class="modal-overlay" style="z-index: 2000;">
+        <div class="modal" style="max-width: 350px; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 10px;" id="alertIcon">📢</div>
+            <h3 id="alertTitle" style="margin: 0 0 10px 0;">提示</h3>
+            <p id="alertMessage" style="color: #666;">內容</p>
+            <button class="gen-link-btn" onclick="closeModal('alertModal')" style="margin-top: 15px;">確定</button>
+        </div>
+    </div>
+
+    <script>
+        // === 1. 核心變數與設定 ===
+        
+        const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbxCGLimm04x9IR45AAe-kFoYJ9JGvnw1Nout5VGwp1LHGc-YEgPX91N430f9U65DHzB/exec"; 
+        
+        let currentGasUrl = "";
+        let worksData = [];
+
+        // 頁面載入時執行
+        document.addEventListener('DOMContentLoaded', () => {
+            initGasUrl();
+            initPublicUrl();
+            loadGallery();
+            document.getElementById('gasCodeDisplay').innerText = `// 請將此處內容替換為完整的 Code.gs 內容\n// (請參考本文檔上方的 Code.gs 區塊)`;
+        });
+
+        // 初始化公開網址
+        function initPublicUrl() {
+            const storedPublicUrl = localStorage.getItem('app_public_url');
+            const currentHref = window.location.href.split('?')[0]; 
+            const publicUrlInput = document.getElementById('appPublicUrl');
+
+            if (storedPublicUrl) {
+                publicUrlInput.value = storedPublicUrl;
+            } else {
+                if (currentHref.startsWith('blob:') || currentHref.startsWith('file:')) {
+                    publicUrlInput.value = ""; 
+                } else {
+                    publicUrlInput.value = currentHref;
+                }
+            }
+        }
+
+        function initGasUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const configParam = urlParams.get('config');
+            const storedUrl = localStorage.getItem('gas_app_url');
+
+            if (configParam) {
+                try {
+                    currentGasUrl = atob(decodeURIComponent(configParam));
+                    localStorage.setItem('gas_app_url', currentGasUrl);
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                } catch (e) {
+                    console.error("網址參數解碼失敗", e);
+                }
+            } else if (storedUrl) {
+                currentGasUrl = storedUrl;
+            } else {
+                currentGasUrl = DEFAULT_GAS_URL;
+            }
+            document.getElementById('gasUrlInput').value = currentGasUrl;
+        }
+
+        // === 2. 介面控制 ===
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+
+            if (tabName === 'gallery') {
+                document.querySelector('.tab-btn:first-child').classList.add('active');
+                document.getElementById('gallery-section').classList.add('active');
+                loadGallery(); 
+            } else {
+                document.querySelector('.tab-btn:last-child').classList.add('active');
+                document.getElementById('upload-section').classList.add('active');
+            }
+        }
+
+        function toggleInputFields() {
+            const type = document.getElementById('workType').value;
+            document.getElementById('input-image').classList.add('hidden');
+            document.getElementById('input-text').classList.add('hidden');
+            document.getElementById('input-url').classList.add('hidden');
+
+            if (type === 'image') document.getElementById('input-image').classList.remove('hidden');
+            if (type === 'text') document.getElementById('input-text').classList.remove('hidden');
+            if (type === 'url') document.getElementById('input-url').classList.remove('hidden');
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // === Lightbox 控制函式 (支援圖片與 YouTube) ===
+        function openLightbox(type, content) {
+            const lightbox = document.getElementById('lightbox');
+            const container = document.getElementById('lightbox-container');
+            
+            // 清空舊內容
+            container.innerHTML = '';
+            
+            if (type === 'image') {
+                const img = document.createElement('img');
+                img.src = content;
+                img.className = 'lightbox-content-img';
+                img.alt = "大圖預覽";
+                img.onclick = (e) => e.stopPropagation(); // 防止點擊圖片關閉
+                container.appendChild(img);
+            } else if (type === 'youtube') {
+                // 嵌入 YouTube iframe
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://www.youtube.com/embed/${content}?autoplay=1`;
+                iframe.className = 'lightbox-content-video';
+                iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                iframe.allowFullscreen = true;
+                container.appendChild(iframe);
+            }
+            
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox(event) {
+            // 只有點擊背景或關閉按鈕時才關閉
+            const lightbox = document.getElementById('lightbox');
+            const container = document.getElementById('lightbox-container');
+            lightbox.classList.remove('active');
+            // 延遲清空以停止影片播放
+            setTimeout(() => { container.innerHTML = ''; }, 300);
+        }
+
+        function showAlert(title, message, icon="📢") {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMessage').innerText = message;
+            document.getElementById('alertIcon').innerText = icon;
+            openModal('alertModal');
+        }
+
+        // === 3. 資料與 API 邏輯 ===
+
+        async function loadGallery() {
+            if (!currentGasUrl) {
+                document.getElementById('loading').innerHTML = `
+                    ⚠️ 尚未設定 API 網址。<br>
+                    請點擊右上角 ⚙️ 設定，或切換至「上傳作品」頁面。
+                `;
+                return;
+            }
+
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('gallery-grid').innerHTML = '';
+
+            try {
+                const response = await fetch(`${currentGasUrl}?t=${new Date().getTime()}`);
+                const json = await response.json();
+
+                if (json.status === 'success') {
+                    worksData = json.data;
+                    renderWorks(worksData);
+                    document.getElementById('loading').classList.add('hidden');
+                } else {
+                    throw new Error(json.message);
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loading').innerHTML = `❌ 載入失敗: ${error.message}<br>請檢查 GAS 網址或權限設定。`;
+            }
+        }
+
+        // 強力版 YouTube ID 解析器 (支援 Shorts, m.youtube, youtu.be, embed, watch)
+        function getYouTubeId(url) {
+            if (!url) return null;
+            url = url.toString().trim();
+            // 涵蓋大多數 YouTube URL 變體
+            const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            // 確保 ID 長度合理 (通常是 11 位)
+            return (match && match[2].length >= 10) ? match[2] : null;
+        }
+
+        function renderWorks(works) {
+            const container = document.getElementById('gallery-grid');
+            container.innerHTML = '';
+
+            if (works.length === 0) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888;">📭 目前還沒有作品，快來當第一個！</div>';
+                return;
+            }
+
+            works.forEach(work => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                // 判斷內容類型
+                let contentHtml = '';
+                if (work.type === 'image') {
+                    // 圖片：點擊開啟大圖
+                    contentHtml = `
+                        <div class="card-img-container" onclick="openLightbox('image', '${work.content}')">
+                            <img src="${work.content}" class="card-img" alt="${work.title}" onerror="this.src='https://placehold.co/400x300?text=Image+Error'">
+                        </div>`;
+                } else if (work.type === 'url') {
+                    // YouTube：顯示縮圖與播放鈕，點擊開啟大視窗播放
+                    const youtubeId = getYouTubeId(work.content);
+                    
+                    if (youtubeId) {
+                        contentHtml = `
+                            <div class="card-img-container" onclick="openLightbox('youtube', '${youtubeId}')">
+                                <img src="https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg" class="card-img" alt="Video Thumbnail">
+                                <div class="play-icon-overlay">▶</div>
+                            </div>`;
+                    } else {
+                        // 連結解析失敗的 fallback
+                        contentHtml = `
+                            <div style="width:100%; height:200px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#eef;">
+                                <div style="font-size:3rem;">🔗</div>
+                                <a href="${work.content}" target="_blank" style="margin-top:10px; color:var(--accent-color); font-weight:bold;">點擊開啟連結</a>
+                            </div>`;
+                    }
+                } else {
+                    contentHtml = `
+                        <div style="width:100%; height:200px; padding:20px; display:flex; align-items:center; justify-content:center; background:#fff8e1; text-align:center; overflow:hidden;">
+                            <span style="font-family:'Courier New', monospace;">${String(work.content).substring(0, 50)}...</span>
+                        </div>`;
+                }
+
+                // 檢查是否已按讚
+                const likedKey = `liked_${work.id}`;
+                const isLiked = localStorage.getItem(likedKey);
+                const likeBtnClass = isLiked ? 'like-btn liked' : 'like-btn';
+                const likeBtnAttr = isLiked ? 'disabled' : '';
+
+                card.innerHTML = `
+                    ${contentHtml}
+                    <div class="card-content">
+                        <div class="card-title">${escapeHtml(work.title)}</div>
+                        <div class="card-text">${work.type === 'text' ? escapeHtml(work.content) : (work.type === 'url' ? 'YouTube 影片分享' : '圖片創作')}</div>
+                        <div style="font-size:0.8em; color:#999; margin-top:10px;">🕒 ${new Date(work.time).toLocaleString()}</div>
+                    </div>
+                    <div class="card-footer">
+                        <span></span>
+                        <button class="${likeBtnClass}" onclick="handleLike('${work.id}', this)" ${likeBtnAttr}>
+                            ♥ <span class="like-count">${work.likes}</span>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function handleLike(id, btnElement) {
+            if (!currentGasUrl) return;
+
+            const countSpan = btnElement.querySelector('.like-count');
+            const originalCount = parseInt(countSpan.innerText);
+            
+            btnElement.classList.add('liked');
+            btnElement.disabled = true;
+            countSpan.innerText = originalCount + 1;
+            
+            localStorage.setItem(`liked_${id}`, 'true');
+
+            try {
+                const payload = { action: 'like', id: id };
+                await fetch(currentGasUrl, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+            } catch (error) {
+                btnElement.classList.remove('liked');
+                btnElement.disabled = false;
+                countSpan.innerText = originalCount;
+                localStorage.removeItem(`liked_${id}`);
+                showAlert("錯誤", "按讚失敗，請稍後再試。", "❌");
+            }
+        }
+
+        async function submitWork() {
+            if (!currentGasUrl) {
+                showAlert("未設定", "請先設定 GAS URL。", "⚠️");
+                return;
+            }
+
+            const type = document.getElementById('workType').value;
+            const title = document.getElementById('workTitle').value;
+            let content = "";
+
+            if (!title) {
+                showAlert("缺少資料", "請輸入標題！", "⚠️");
+                return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = "處理中...";
+
+            try {
+                if (type === 'text') {
+                    content = document.getElementById('textContent').value;
+                    if(!content) throw new Error("請輸入文字內容");
+                } else if (type === 'url') {
+                    content = document.getElementById('urlContent').value;
+                    if(!content) throw new Error("請輸入網址");
+                    // 嚴格檢查是否為 YouTube 網址
+                    if (!getYouTubeId(content)) {
+                        throw new Error("無法辨識影片 ID，請確認格式 (例如: https://youtu.be/...)");
+                    }
+                } else if (type === 'image') {
+                    const fileInput = document.getElementById('imageFile');
+                    if (fileInput.files.length === 0) throw new Error("請選擇圖片");
+                    content = await compressImage(fileInput.files[0]);
+                }
+
+                const payload = {
+                    action: 'upload',
+                    data: {
+                        type: type,
+                        title: title,
+                        content: content
+                    }
+                };
+
+                const response = await fetch(currentGasUrl, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                
+                const json = await response.json();
+                
+                if (json.status === 'success') {
+                    showAlert("成功", "作品上傳成功！", "🎉");
+                    document.getElementById('workTitle').value = '';
+                    document.getElementById('textContent').value = '';
+                    document.getElementById('urlContent').value = '';
+                    document.getElementById('imageFile').value = '';
+                    switchTab('gallery');
+                } else {
+                    throw new Error(json.message);
+                }
+
+            } catch (error) {
+                showAlert("上傳失敗", error.message, "❌");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "🚀 發送作品";
+            }
+        }
+
+        // === 4. 工具函式 ===
+
+        function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const maxWidth = 800;
+
+                        if (width > maxWidth) {
+                            height = Math.round(height * (maxWidth / width));
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+                        
+                        if (dataUrl.length > 49000) {
+                            const dataUrl2 = canvas.toDataURL('image/jpeg', 0.3);
+                             if (dataUrl2.length > 49000) {
+                                reject(new Error("圖片壓縮後仍然過大，請選擇更簡單或更小的圖片。"));
+                             } else {
+                                resolve(dataUrl2);
+                             }
+                        } else {
+                            resolve(dataUrl);
+                        }
+                    };
+                    img.onerror = (err) => reject(err);
+                };
+                reader.onerror = (err) => reject(err);
+            });
+        }
+
+        function saveSettings() {
+            const url = document.getElementById('gasUrlInput').value.trim();
+            const publicUrl = document.getElementById('appPublicUrl').value.trim();
+            
+            if (url) {
+                localStorage.setItem('gas_app_url', url);
+                currentGasUrl = url;
+            }
+            if (publicUrl) {
+                localStorage.setItem('app_public_url', publicUrl);
+            }
+        }
+
+        function clearSettings() {
+            localStorage.removeItem('gas_app_url');
+            localStorage.removeItem('app_public_url');
+            document.getElementById('gasUrlInput').value = '';
+            document.getElementById('appPublicUrl').value = '';
+            currentGasUrl = DEFAULT_GAS_URL;
+            showAlert("已重置", "設定已清除，請重新整理頁面。", "🧹");
+            setTimeout(() => location.reload(), 1500);
+        }
+
+        function generateShareLink() {
+            if (!currentGasUrl) {
+                showAlert("錯誤", "請先輸入並儲存 GAS URL 才能產生分享連結。", "⚠️");
+                return;
+            }
+            
+            const publicUrlInput = document.getElementById('appPublicUrl');
+            let baseUrl = publicUrlInput.value.trim();
+
+            if (!baseUrl) {
+                showAlert("請注意", "請輸入本網頁的發布網址 (Web Page URL)，否則 QR Code 將無效。", "⚠️");
+                publicUrlInput.focus();
+                return;
+            }
+
+            baseUrl = baseUrl.split('?')[0];
+
+            const encodedConfig = encodeURIComponent(btoa(currentGasUrl));
+            const longUrl = `${baseUrl}?config=${encodedConfig}`;
+            
+            const qrApi = `https://quickchart.io/qr?text=${encodeURIComponent(longUrl)}&size=200&margin=1`;
+            
+            document.getElementById('qrImage').src = qrApi;
+            document.getElementById('shortLinkDisplay').innerHTML = `
+                <a href="${longUrl}" target="_blank">點此開啟連結</a><br>
+                (此連結已包含設定，他人開啟後即自動連線)
+            `;
+            document.getElementById('shareResult').classList.remove('hidden');
+            
+            saveSettings();
+        }
+
+        function copyToClipboard(text, successCallback) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text)
+                    .then(successCallback)
+                    .catch(err => {
+                        console.warn("Clipboard API failed, trying execCommand fallback...", err);
+                        fallbackCopy(text, successCallback);
+                    });
+            } else {
+                fallbackCopy(text, successCallback);
+            }
+        }
+
+        function fallbackCopy(text, successCallback) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            
+            textArea.style.position = "fixed";
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.width = "2em";
+            textArea.style.height = "2em";
+            textArea.style.padding = "0";
+            textArea.style.border = "none";
+            textArea.style.outline = "none";
+            textArea.style.boxShadow = "none";
+            textArea.style.background = "transparent";
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful && successCallback) {
+                    successCallback();
+                } else if (!successful) {
+                    showAlert("複製失敗", "瀏覽器封鎖了複製功能，請手動複製。", "⚠️");
+                }
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+                showAlert("複製失敗", "無法存取剪貼簿。", "⚠️");
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        function copyShareLink() {
+            const linkText = document.getElementById('shortLinkDisplay').querySelector('a').href;
+            copyToClipboard(linkText, () => {
+                const btn = document.querySelector('.copy-btn');
+                const originText = btn.innerText;
+                btn.innerText = "已複製！";
+                setTimeout(() => btn.innerText = originText, 2000);
+            });
+        }
+
+        function copyGasCode() {
+             const code = document.getElementById('gasCodeDisplay').innerText;
+             copyToClipboard(code, () => {
+                showAlert("複製成功", "程式碼已複製到剪貼簿", "📋");
+             });
+        }
+
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return "";
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
